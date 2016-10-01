@@ -6,6 +6,8 @@ Facebook::Messenger.configure do |config|
   config.verify_token = ENV['messenger_bot_verify_token']
 end
 
+Facebook::Messenger::Subscriptions.subscribe
+
 Bot.on :message do |message|
   Bot.deliver(
     recipient: message.sender,

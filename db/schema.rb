@@ -10,19 +10,20 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20161001091911) do
+ActiveRecord::Schema.define(version: 20161001210946) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
   create_table "data", force: :cascade do |t|
-    t.string   "passenger_name"
     t.string   "flight_number"
     t.datetime "start_time"
     t.datetime "lineup_time"
     t.datetime "departure_time"
     t.datetime "created_at",     null: false
     t.datetime "updated_at",     null: false
+    t.text     "sender"
+    t.integer  "state"
   end
 
 end

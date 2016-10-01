@@ -83,4 +83,9 @@ Rails.application.configure do
 
   # Do not dump schema after migrations.
   config.active_record.dump_schema_after_migration = false
+
+  # Auto-load the bot and its subdirectories
+  config.paths.add File.join('app', 'bot'), glob: File.join('**', '*.rb')
+  config.autoload_paths += Dir[Rails.root.join('app', 'bot', '*')]
+
 end

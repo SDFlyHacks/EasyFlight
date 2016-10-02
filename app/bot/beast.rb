@@ -51,6 +51,7 @@ Bot.on :message do |message|
         text: 'Hello! When and where will you be flying? Please respond in the following form: [Flight Number] (e.g. UAL1183)'
       }
     )
+    convo.save
     return
   end
 

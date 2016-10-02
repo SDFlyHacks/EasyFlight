@@ -99,9 +99,9 @@ Bot.on :message do |message|
       # If they did not, we cannot advance just yet.
       if !message.attachments.nil? &&
          !message.attachments['payload'].nil? &&
-         !message.attachments['payload'][0]['coordinates'].nil?
-        lat = message.attachments['payload'][0]['coordinates']['lat']
-        lng = message.attachments['payload'][0]['coordinates']['long']
+         !message.attachments[0]['payload']['coordinates'].nil?
+        lat = message.attachments[0]['payload']['coordinates']['lat']
+        lng = message.attachments[0]['payload']['coordinates']['long']
 
         map_link = url_generator('#{lat},#{lng}',
                                  convo.flight_data[:depart_airport])

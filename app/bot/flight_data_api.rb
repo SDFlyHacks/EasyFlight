@@ -2,7 +2,7 @@ require 'httparty'
 require 'nokogiri'
 
 
-def url_generator(flight_no)
+def flight_data_url_generator(flight_no)
   return "http://flightaware.com/live/flight/" + flight_no
 end
 
@@ -26,5 +26,10 @@ def extractor(url)
 
   # Takeoff time
   time_info = parse_page.css('#slideOutPanel').css('.pageContainer').css('.layout-table').css('tbody').css('tr').css('.track-panel-scheduledtime').css('td')[0].text.strip()
-  return {:airline_link => airline_link, :airport_info => airport_info, :terminal_info => terminal_info, :time_info => time_info}.to_json
+  return {:airline_link => airline_link, :airport_info => airport_info, :terminal_info => terminal_info, :time_info => time_info}
+end
+
+def get_flight_data_from_number(flight_no)
+  url = flight_data_url_generator(flight_no)
+  return extractor(url)
 end

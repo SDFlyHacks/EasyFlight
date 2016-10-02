@@ -1,3 +1,15 @@
+# require './flight_data_api'
+# require './maps_api'
+# require './tsa_api'
+
+# def deliver_invalid_message(to_sender)
+#   Bot.deliver(
+#     recipient: to_sender,
+#     message: {
+#       text: "Sorry, that input is invalid. Please try again."
+#     }
+#   )
+
 # Bot.on :message do |message|
 
 #   sender = message.sender
@@ -25,8 +37,30 @@
 #       convo.flight_number = flight_num
 
 #       # Execute parser here. Get the flight data.
-#       # Return the check in card.
+#       begin
+#         flight_data = get_flight_data_from_number(flight_num)
+#       rescue NoMethodError
+#         deliver_invalid_message(sender)
+#         return
 
+#       Bot.deliver(
+#         recipient: sender,
+#         message: {
+#           text: "Please share your location! :-)"
+#           quick_replies: [
+#             {
+#               content_type: "location",
+#             }
+#           ]
+#         }
+#       )
+
+#       # TODO: Deal with the location message callback.
+
+#       convo.flight_data = flight_data
+#       convo.state += 1
+#       convo.save()
+#     when 1
 #       # Send the user the map!
 #       Bot.deliver(
 #         recipient: sender,
@@ -40,7 +74,7 @@
 #               buttons: [
 #                 {
 #                   type: "web_url",
-#                   url: "STUFF_FROM_API.COM",
+#                   url: "lol.com",
 #                   title: "View Map",
 #                   webview_height_ratio: "compact"
 #                 }
@@ -92,18 +126,32 @@
 
 #       convo.state += 1
 #       convo.save()
-#     when 1
+#     when 2
 #       okay_message = message.text
 #       if okay_message.casecmp("okay") == 0
 #         # Let them know the TSA Screening time
 #         # Call kevin's magical API CAll here
-#         #
-#         convo.state +=
+#         expected_wait_time = get_tsa_data_from_airport(convo.airport)
+
+#         Bot.deliver(
+#           recipient: sender,
+#           message: {
+#             text: "Great! Now, head over to the screening area. Note that the expected wait time right now is #{expected_wait_time}. Hope you have something to do in the meantime!"
+#           }
+#         )
+
+#         convo.state += 1
 #         convo.save()
-#     when 2:
+#     when 3:
 #       # Message 30 minutes before departure time.
 #       # The user does not need to message for us to trigger this.
 #       # We should tell the user to go to gate (...).
 #       # "Have a good flight!"
+#       Bot.deliver(
+#         recipient: sender,
+#         message: {
+#           text: "Please go to gate #{gate_number}. Enjoy your flight!",
+#         }
+#       )
 #   end
 # end

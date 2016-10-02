@@ -27,6 +27,7 @@ def time_from_now_until_boarding(departure_time)
 end
 
 Bot.on :message do |message|
+  puts "Incoming message."
   puts message
   sender = message.sender
   sender_id = sender[:id]

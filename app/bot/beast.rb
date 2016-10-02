@@ -10,7 +10,7 @@ Facebook::Messenger.configure do |config|
   config.verify_token = ENV['messenger_bot_verify_token']
 end
 
-Facebook::Messenger::Subscriptions.subscribe
+# Facebook::Messenger::Subscriptions.subscribe
 
 def deliver_invalid_message(to_sender)
   Bot.deliver(
@@ -37,14 +37,14 @@ Bot.on :message do |message|
   puts "END MESSAGE"
 
   sender = message.sender
-  sender_id = sender[:id]
-  convo = ActiveRecord::Base.connection.execute("SELECT * FROM conversations WHERE sender='#{sender_id}' ORDER BY created_at DESC").first()
+  sender_id = sender["id"]
+  convo = Conversation.where(sender: sender_id).order(created_at: :desc).first()
   # Query for the convo....
   # - What uniquely identifies a convo?
   #   - (sender, starting_time_of_first_convo)
 
   if convo.nil?
-    convo = Conversation.new(sender: sender[:id], state: 0)
+    convo = Conversation.new(sender: sender_id, state: 0)
     Bot.deliver(
       recipient: sender,
       message: {

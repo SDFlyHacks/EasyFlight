@@ -4,6 +4,7 @@ require 'time'
 require 'pry'
 
 def flight_data_url_generator(flight_no)
+  # Return the url of the flight data source.
   return "http://flightaware.com/live/flight/" + flight_no
 end
 
@@ -41,7 +42,7 @@ def extractor(url)
   arrival_iso_time = Time.strptime(arrival_time, "%I:%M%P").strftime('%Y-%m-%dT%H:%M')
 
   if (arrival_iso_time < takeoff_iso_time)
-    arrival_iso_time = arrival_iso_time + (12 * 60)
+    arrival_iso_time = arrival_iso_time + (12 * 60 * 60)
   end
 
   return {:airline_link => airline_link, :depart_city => depart_city, :depart_iata => depart_iata,
@@ -54,6 +55,3 @@ def get_flight_data_from_number(flight_no)
   url = flight_data_url_generator(flight_no)
   return extractor(url)
 end
-
-url = flight_data_url_generator('UAL390')
-puts extractor(url)

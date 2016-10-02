@@ -27,6 +27,7 @@ def time_from_now_until_boarding(departure_time)
 end
 
 Bot.on :message do |message|
+  puts message
   sender = message.sender
   sender_id = sender[:id]
   convo = ActiveRecord::Base.connection.execute("SELECT * FROM conversations WHERE sender='#{sender_id}' ORDER BY created_at DESC").first()

@@ -1,7 +1,6 @@
 require 'httparty'
 require 'nokogiri'
 require 'time'
-require 'pry'
 
 def flight_data_url_generator(flight_no)
   # Return the url of the flight data source.

@@ -104,7 +104,7 @@ Bot.on :message do |message|
         lng = message.attachments[0]['payload']['coordinates']['long']
 
         map_link = url_generator('#{lat},#{lng}',
-                                 convo.flight_data[:depart_airport])
+                                 convo.flight_data[:depart_city])
 
         # Send the user the map!
         Bot.deliver(

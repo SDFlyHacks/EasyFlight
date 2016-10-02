@@ -99,9 +99,9 @@ Bot.on :message do |message|
     # If they did not, we cannot advance just yet.
     lat = nil
     lng = nil
-    if !message.attachments.nil? and !message.attachments.payload.nil? and !message.attachments.payload.coordinates.nil?
-      lat = message.attachments.payload.coordinates.lat
-      lng = message.attachments.payload.coordinates.lng
+    if !message.attachments.nil? and !message.attachments["payload"].nil? and !message.attachments["payload"]["coordinates"].nil?
+      lat = message.attachments["payload"]["coordinates"]["lat"]
+      lng = message.attachments["payload"]["coordinates"]["long"]
     else
       deliver_invalid_message(sender)
       return

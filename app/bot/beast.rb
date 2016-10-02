@@ -54,7 +54,7 @@ Bot.on :message do |message|
       }
     )
     convo.save
-    break
+    return false
   end
 
   state = convo.state
@@ -72,7 +72,7 @@ Bot.on :message do |message|
       flight_data = get_flight_data_from_number(flight_num)
     rescue NoMethodError
       deliver_invalid_message(sender)
-      break
+      return false
     end
 
     Bot.deliver(
@@ -106,7 +106,7 @@ Bot.on :message do |message|
       lng = message.attachments['payload']['coordinates']['long']
     else
       deliver_invalid_message(sender)
-      break
+      return false
     end
 
     map_link = url_generator('#{lat},#{lng}',
@@ -211,7 +211,7 @@ Bot.on :message do |message|
       convo.save
     else
       deliver_invalid_message(sender)
-      break
+      return false
     end
   when 3
     # Message 30 minutes before departure time.
@@ -228,3 +228,5 @@ Bot.on :message do |message|
     convo.save
   end
 end
+
+return true

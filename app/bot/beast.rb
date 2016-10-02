@@ -97,8 +97,8 @@ Bot.on :message do |message|
       # Warning: It MUST be the case that the user went ahead and
       # shared their location through the quick reply option given above.
       # If they did not, we cannot advance just yet.
-      if !message.attachments.nil? &&
-         !message.attachments['payload'].nil? &&
+      if !message.attachments[0].nil? &&
+         !message.attachments[0]['payload'].nil? &&
          !message.attachments[0]['payload']['coordinates'].nil?
         lat = message.attachments[0]['payload']['coordinates']['lat']
         lng = message.attachments[0]['payload']['coordinates']['long']

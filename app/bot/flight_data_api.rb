@@ -40,9 +40,9 @@ def extractor(url)
   arrival_time = parse_page.css('#slideOutPanel').css('.pageContainer').css('.layout-table').css('tbody').css('tr').css('.track-panel-scheduledtime').css('td')[1].text.strip().split(" ")[0]
   arrival_iso_time = Time.strptime(arrival_time, "%I:%M%P").strftime('%Y-%m-%dT%H:%M')
 
-  if (arrival_iso_time < takeoff_iso_time)
-    arrival_iso_time = arrival_iso_time + (12 * 60 * 60)
-  end
+  # if (arrival_iso_time < takeoff_iso_time)
+  #   arrival_iso_time = arrival_iso_time + (12 * 60 * 60)
+  # end
 
   return {:airline_link => airline_link, :depart_city => depart_city, :depart_iata => depart_iata,
           :arrival_city => arrival_city, :arrival_iata => arrival_iata,

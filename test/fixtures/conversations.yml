@@ -1,0 +1,17 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  id: 
+  state: 1
+  sender: MyText
+  flight_number: MyText
+  flight_data: MyText
+  starting_time: 2016-10-02 05:56:51
+
+two:
+  id: 
+  state: 1
+  sender: MyText
+  flight_number: MyText
+  flight_data: MyText
+  starting_time: 2016-10-02 05:56:51

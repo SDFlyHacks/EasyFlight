@@ -1,157 +1,196 @@
-# require './flight_data_api'
-# require './maps_api'
-# require './tsa_api'
+require 'flight_data_api'
+require 'maps_api'
+require 'tsa_api'
 
-# def deliver_invalid_message(to_sender)
-#   Bot.deliver(
-#     recipient: to_sender,
-#     message: {
-#       text: "Sorry, that input is invalid. Please try again."
-#     }
-#   )
+include Facebook::Messenger
 
-# Bot.on :message do |message|
+Facebook::Messenger.configure do |config|
+  config.access_token = ENV['messenger_bot_access_token']
+  config.app_secret = ENV["messenger_bot_app_secret"]
+  config.verify_token = ENV['messenger_bot_verify_token']
+end
 
-#   sender = message.sender
-#   convo = nil
-#   #Query for the convo....
-#   # - What uniquely identifies a convo?
-#   #   - (sender, starting_time_of_first_convo)
+Facebook::Messenger::Subscriptions.subscribe
 
-#   if convo.nil?
-#     convo = Conversation.new(sender_id: sender, state: 0)
-#     Bot.deliver(
-#       recipient: sender,
-#       message: {
-#         text: 'Hello! When and where will you be flying? Please respond in the following form: [Flight Number] (e.g. UAL1183)'
-#       }
-#     )
-#   else
-#     state = convo.state
+def deliver_invalid_message(to_sender)
+  Bot.deliver(
+    recipient: to_sender,
+    message: {
+      text: "Sorry, that input is invalid. Please try again."
+    }
+  )
+end
 
-#     case state
-#     when 0
-#       # Here, we need to look at the flight number the user sent.
-#       # validate?
-#       flight_num = message.text
-#       convo.flight_number = flight_num
+Bot.on :message do |message|
 
-#       # Execute parser here. Get the flight data.
-#       begin
-#         flight_data = get_flight_data_from_number(flight_num)
-#       rescue NoMethodError
-#         deliver_invalid_message(sender)
-#         return
+  sender = message.sender
+  sender_id = sender[:id]
+  convo = ActiveRecord::Base.connection.execute("SELECT * FROM conversations WHERE sender='#{sender_id}' ORDER BY created_at DESC").first()
+  #Query for the convo....
+  # - What uniquely identifies a convo?
+  #   - (sender, starting_time_of_first_convo)
 
-#       Bot.deliver(
-#         recipient: sender,
-#         message: {
-#           text: "Please share your location! :-)"
-#           quick_replies: [
-#             {
-#               content_type: "location",
-#             }
-#           ]
-#         }
-#       )
+  if convo.nil?
+    convo = Conversation.new(sender_id: sender[:id], state: 0)
+    Bot.deliver(
+      recipient: sender,
+      message: {
+        text: 'Hello! When and where will you be flying? Please respond in the following form: [Flight Number] (e.g. UAL1183)'
+      }
+    )
+    return
+  end
 
-#       # TODO: Deal with the location message callback.
+  state = convo.state
 
-#       convo.flight_data = flight_data
-#       convo.state += 1
-#       convo.save()
-#     when 1
-#       # Send the user the map!
-#       Bot.deliver(
-#         recipient: sender,
-#         sender_action: 'typing_on',
-#         message: {
-#           attachment: {
-#             type: "template",
-#             payload: {
-#               template_type: "button",
-#               text: "See the map of your trip!",
-#               buttons: [
-#                 {
-#                   type: "web_url",
-#                   url: "lol.com",
-#                   title: "View Map",
-#                   webview_height_ratio: "compact"
-#                 }
-#               ]
-#             }
-#           }
-#         }
-#       )
+  case state
+  when 0
+    # We get the flight data, and then follow-up by asking the user
+    # for their location.
 
-#       # Send the user the check-in card.
-#       Bot.deliver(
-#         recipient: sender,
-#         message: {
-#           text: "Here's your check-in. When you're at the airport, enter 'okay' to continue."
-#           attachment: {
-#             type: "template",
-#             payload: {
-#               template_type: "airline_checkin",
-#               intro_message: "Check-in is available now.",
-#               locale: "en_US",
-#               pnr_number: "ABCDEF",
-#               flight_info: [
-#                 {
-#                   flight_number: "f001",
-#                   departure_airport: {
-#                     airport_code: "SFO",
-#                     city: "San Francisco",
-#                     terminal: "T4",
-#                     gate: "G8"
-#                   },
-#                   arrival_airport: {
-#                     airport_code: "SEA",
-#                     city: "Seattle",
-#                     terminal: "T4",
-#                     gate: "G8"
-#                   },
-#                   flight_schedule: {
-#                     boarding_time: "2016-01-05T15:05",
-#                     departure_time: "2016-01-05T15:45",
-#                     arrival_time: "2016-01-05T17:30"
-#                   }
-#                 }
-#               ],
-#               checkin_url: "https:\/\/www.airline.com\/check-in"
-#             }
-#           }
-#         }
-#       )
+    flight_num = message.text
+    convo.flight_number = flight_num
 
-#       convo.state += 1
-#       convo.save()
-#     when 2
-#       okay_message = message.text
-#       if okay_message.casecmp("okay") == 0
-#         # Let them know the TSA Screening time
-#         # Call kevin's magical API CAll here
-#         expected_wait_time = get_tsa_data_from_airport(convo.airport)
+    # Execute parser here. Get the flight data.
+    begin
+      flight_data = get_flight_data_from_number(flight_num)
+    rescue NoMethodError
+      deliver_invalid_message(sender)
+      return
+    end
 
-#         Bot.deliver(
-#           recipient: sender,
-#           message: {
-#             text: "Great! Now, head over to the screening area. Note that the expected wait time right now is #{expected_wait_time}. Hope you have something to do in the meantime!"
-#           }
-#         )
+    Bot.deliver(
+      recipient: sender,
+      message: {
+        text: "Please share your location! :-)",
+        quick_replies: [
+          {
+            content_type: "location",
+          }
+        ]
+      }
+    )
 
-#         convo.state += 1
-#         convo.save()
-#     when 3:
-#       # Message 30 minutes before departure time.
-#       # The user does not need to message for us to trigger this.
-#       # We should tell the user to go to gate (...).
-#       # "Have a good flight!"
-#       Bot.deliver(
-#         recipient: sender,
-#         message: {
-#           text: "Please go to gate #{gate_number}. Enjoy your flight!",
-#         }
-#       )
-#   end
-# end
+    convo.flight_data = flight_data
+    convo.state += 1
+    convo.save()
+  when 1
+    # We give the user:
+    #   - A map indicating the trip from origin to airport of departure
+    #   - A check-in card.
+
+    # PULL OUT ORIGIN FROM CALLBACK
+    # Warning: It MUST be the case that the user went ahead and
+    # shared their location through the quick reply option given above.
+    # If they did not, we cannot advance just yet.
+    lat = nil
+    lng = nil
+    if !message.attachments.nil? and !message.attachments.payload.nil? and !message.attachments.payload.coordinates.nil?
+      lat = message.attachments.payload.coordinates.lat
+      lng = message.attachments.payload.coordinates.lng
+    else
+      deliver_invalid_message(sender)
+      return
+    end
+
+    map_link = url_generator("#{lat},#{lng}", convo.flight_data[:depart_airport])
+
+    # Send the user the map!
+    Bot.deliver(
+      recipient: sender,
+      sender_action: 'typing_on',
+      message: {
+        attachment: {
+          type: "template",
+          payload: {
+            template_type: "button",
+            text: "See the map of your trip!",
+            buttons: [
+              {
+                type: "web_url",
+                url: map_link,
+                title: "View Map",
+                webview_height_ratio: "compact"
+              }
+            ]
+          }
+        }
+      }
+    )
+
+    # Send the user the check-in card.
+    Bot.deliver(
+      recipient: sender,
+      message: {
+        text: "Here's your check-in. When you're at the airport, enter 'okay' to continue.",
+        attachment: {
+          type: "template",
+          payload: {
+            template_type: "airline_checkin",
+            intro_message: "Check-in is available now.",
+            locale: "en_US",
+            pnr_number: "ABCDEF",
+            flight_info: [
+              {
+                flight_number: convo.flight_data[:flight_number],
+                departure_airport: {
+                  airport_code: convo.flight_data[:depart_iata],
+                  city: convo.flight_data[:depart_city],
+                  terminal: "",
+                  gate: convo.flight_data[:departing_terminal],
+                },
+                arrival_airport: {
+                  airport_code: convo.flight_data[:arrival_iata],
+                  city: convo.flight_data[:arrival_city],
+                  terminal: "",
+                  gate: convo.flight_data[:arrival_terminal],
+                },
+                flight_schedule: {
+                  boarding_time: "2016-01-05T15:05",
+                  departure_time: convo.flight_data[:takeoff_iso_time],
+                  arrival_time: convo.flight_data[:arrival_iso_time]
+                }
+              }
+            ],
+            checkin_url: convo.flight_data[:airline_link],
+          }
+        }
+      }
+    )
+
+    convo.state += 1
+    convo.save()
+  when 2
+    # We tell the user the expected TSA Screening time.
+    okay_message = message.text
+    if okay_message.casecmp("okay") == 0
+      expected_wait_time = get_tsa_data_from_airport(convo.flight_data[:depart_iata])
+
+      Bot.deliver(
+        recipient: sender,
+        message: {
+          text: "Great! Now, head over to the screening area. Note that the expected wait time right now is #{expected_wait_time}. Hope you have something to do in the meantime!"
+        }
+      )
+
+      convo.state += 1
+      convo.save()
+    else
+      deliver_invalid_message(sender)
+      return
+    end
+  when 3
+    # Message 30 minutes before departure time.
+    # The user does not need to message for us to trigger this.
+    # We should tell the user to go to gate (...).
+    # "Have a good flight!"
+    Bot.deliver(
+      recipient: sender,
+      message: {
+        text: "Please go to gate #{gate_number}. Enjoy your flight!",
+      }
+    )
+    convo.state += 1
+    convo.save()
+  end
+end

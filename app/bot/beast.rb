@@ -228,5 +228,3 @@ Bot.on :message do |message|
     convo.save
   end
 end
-
-return true

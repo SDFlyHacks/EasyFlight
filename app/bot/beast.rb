@@ -68,6 +68,7 @@ Bot.on :message do |message|
       # Execute parser here. Get the flight data.
       begin
         flight_data = get_flight_data_from_number(flight_num)
+        puts "Got flight data!"
       rescue NoMethodError
         deliver_invalid_message(sender)
       else

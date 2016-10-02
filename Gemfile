@@ -34,7 +34,7 @@ gem 'jbuilder', '~> 2.5'
 gem 'facebook-messenger'
 
 # Specify Ruby for Heroku!
-gem 'ruby', '~> 2.3.0'
+gem 'ruby', '~> 2.3.1'
 
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console

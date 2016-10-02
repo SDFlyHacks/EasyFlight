@@ -21,17 +21,21 @@ def deliver_invalid_message(to_sender)
   )
 end
 
-Bot.on :message do |message|
+def time_from_now_until_boarding(departure_time)
+  boarding = departure_time - 30.minutes
+  return (boarding - Time.now).round
+end
 
+Bot.on :message do |message|
   sender = message.sender
   sender_id = sender[:id]
   convo = ActiveRecord::Base.connection.execute("SELECT * FROM conversations WHERE sender='#{sender_id}' ORDER BY created_at DESC").first()
-  #Query for the convo....
+  # Query for the convo....
   # - What uniquely identifies a convo?
   #   - (sender, starting_time_of_first_convo)
 
   if convo.nil?
-    convo = Conversation.new(sender_id: sender[:id], state: 0)
+    convo = Conversation.new(sender: sender[:id], state: 0)
     Bot.deliver(
       recipient: sender,
       message: {
@@ -160,6 +164,18 @@ Bot.on :message do |message|
 
     convo.state += 1
     convo.save()
+
+    Thread.new do
+      # Sleep until its time to board!
+      sleep(time_from_now_until_boarding(convo.flight_data[:takeoff_iso_time]))
+
+      Bot.deliver(
+        recipient: sender,
+        message: {
+          text: "Please go to gate #{gate_number}. Enjoy your flight!",
+        }
+      )
+    end
   when 2
     # We tell the user the expected TSA Screening time.
     okay_message = message.text

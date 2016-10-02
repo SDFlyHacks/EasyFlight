@@ -108,8 +108,13 @@ Bot.on :message do |message|
 
         # Send the user the map!
         Bot.deliver(
+          'recipient': {
+            'id': sender
+          }
+          'sender_action': 'typing_on'
+        )
+        Bot.deliver(
           recipient: sender,
-          sender_action: 'typing_on',
           message: {
             attachment: {
               type: 'template',

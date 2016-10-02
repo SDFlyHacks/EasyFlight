@@ -1,24 +1,10 @@
-# README
+# Easy Flight
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+Easy Flight is designed to help individuals plan their journey from their residence
+to the airport and everything in between. It is designed to be easy to use and
+has a low barrier entry design. It employs the existing Facebook messenger platform
+and is the sole interaction between the user and the service.
 
-Things you may want to cover:
-
-* Ruby version
-
-* System dependencies
-
-* Configuration
-
-* Database creation
-
-* Database initialization
-
-* How to run the test suite
-
-* Services (job queues, cache servers, search engines, etc.)
-
-* Deployment instructions
-
-* ...
+For portability and ease of development, the project is built with Docker which
+allows for easy developer setup and is widely integrated with existing third party
+hosting platforms. 
